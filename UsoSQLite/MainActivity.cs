@@ -25,97 +25,79 @@ namespace UsoSQLite
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.activity_main);
 
-            Context mContext = this.CreatePackageContext("com.companyname.PracticaSharedPreferences", Android.Content.PackageContextFlags.IgnoreSecurity);
-
-            Android.Content.ISharedPreferences preferences = mContext.GetSharedPreferences("PreferenciasUsuario", Android.Content.FileCreationMode.Private);
-            //Android.Content.ISharedPreferences preferences = PreferenceManager.GetDefaultSharedPreferences(Application.Context);
-            string preferenciaUsuario = preferences.GetString("Usuario", "isctorres");
-            string preferenciaCorreo = preferences.GetString("Correo", "isctorres@gmail.com");
-
-            EditText usuario = FindViewById<EditText>(Resource.Id.edtUsuario);
-            usuario.Text = preferenciaUsuario;
-            EditText correo = FindViewById<EditText>(Resource.Id.edtCorreo);
-            correo.Text = preferenciaCorreo;
-
-            var pathBaseDeDatos = Path.Combine(FilesDir.AbsolutePath, "libros.sql");
+            var pathBaseDeDatos = Path.Combine(FilesDir.AbsolutePath, "sqlitechat.sql");
             using (var connection = new SQLiteConnection(pathBaseDeDatos))
             {
-                connection.CreateTable<Libro>();
-                connection.CreateTable<Autor>();
-                connection.CreateTable<Editorial>();
+                connection.DropTable<Mensaje>();
+                connection.CreateTable<Mensaje>();
 
-                if (connection.Table<Autor>().Count() == 0)
+                if (connection.Table<Mensaje>().Count() == 0)
                 {
-                    List<Autor> autores = new List<Autor> {
-                        new Autor {
-                            nombre1 = "Luis",
-                            nombre2 = "Moises",
-                            nombre3 = null,
-                            apellidoPaterno = "Burgara",
-                            apellidoMaterno = "Lopez" },
-                        new Autor { nombre1 = "Luis",
-                            nombre2 = null,
-                            nombre3 = null,
-                            apellidoPaterno = "Leithold",
-                            apellidoMaterno = null }
+                    List<Mensaje> mensajes = new List<Mensaje> {
+                        new Mensaje {
+                            usuario  = "Rubensin",
+                            mensaje  = "Hola 1",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Zaid",
+                            mensaje  = "Hola 2",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Rubensin",
+                            mensaje  = "Hola 3",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Zaid",
+                            mensaje  = "Hola 4",
+                            recibido = false
+                        },
+                        new Mensaje {
+                            usuario  = "Rubensin",
+                            mensaje  = "Hola 5",
+                            recibido = false
+                        },
+                        new Mensaje {
+                            usuario  = "Zaid",
+                            mensaje  = "Hola 6",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Rubensin",
+                            mensaje  = "Hola 7",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Zaid",
+                            mensaje  = "Hola 8",
+                            recibido = true
+                        },
+                        new Mensaje {
+                            usuario  = "Rubensin",
+                            mensaje  = "Hola 9",
+                            recibido = false
+                        },
+                        new Mensaje {
+                            usuario  = "Zaid",
+                            mensaje  = "Hola 10",
+                            recibido = false
+                        },
                     };
-                    connection.InsertAll(autores);
+                    connection.InsertAll(mensajes);
                 }
 
-
-                if (connection.Table<Editorial>().Count() == 0)
-                {
-                    List<Editorial> editoriales = new List<Editorial> {
-                        new Editorial {
-                            nombreEditorial = "Springer",
-                            pais = "USA" },
-                    new Editorial {
-                            nombreEditorial = "Limusa",
-                            pais = "Mexico" },
-                    };
-
-                    connection.InsertAll(editoriales);
-                }
-
-                var editorialess = connection.Table<Editorial>().Where(r => r.nombreEditorial == "Springer").ToList()[0];
-                var autoress = connection.Table<Autor>().Where(r => r.apellidoPaterno == "Burgara").ToList()[0];
-
-                if (connection.Table<Libro>().Count() == 0)
-                {
-                    List<Libro> libros = new List<Libro> {
-                    new Libro {
-                        titulo = "Calculo",
-                        EditorialId = connection.Table<Editorial>().Where(r=>r.nombreEditorial=="Springer").ToList()[0].id,
-                        editorial = connection.Table<Editorial>().Where(r=>r.nombreEditorial=="Springer").ToList()[0],
-                        ciudad = "New York",
-                        pais = "USA",
-                        autores = new List<Autor>{connection.Table<Autor>().Where(r=>r.apellidoPaterno=="Leithold").ToList()[0]}
-                    },
-                    new Libro {
-                        titulo = "Algebra",
-                        EditorialId = connection.Table<Editorial>().Where(r=>r.nombreEditorial=="Limusa").ToList()[0].id,
-                        editorial = connection.Table<Editorial>().Where(r=>r.nombreEditorial=="Limusa").ToList()[0],
-                        ciudad = "Ciudad de Mexico",
-                        pais = "Mexico",
-                        autores = new List<Autor>{connection.Table<Autor>().Where(r=>r.apellidoPaterno=="Burgara").ToList()[0]}
-                    }
-                };
-
-                    connection.InsertAll(libros);
-                    libros[0].autores = new List<Autor> { connection.Table<Autor>().Where(r => r.apellidoPaterno == "Leithold").ToList()[0] };
-                    connection.UpdateWithChildren(libros[0]);
-
-                    libros[1].autores = new List<Autor> { connection.Table<Autor>().Where(r => r.apellidoPaterno == "Burgara").ToList()[0] };
-                    connection.UpdateWithChildren(libros[1]);
-                }
-                List<Libro> librosTodos = connection.GetAllWithChildren<Libro>();
-
-                var editoriale = connection.Table<Editorial>().Where(r => r.nombreEditorial == "Springer").ToList()[0];
-                librosTodos[0].editorial = editoriale;
-                connection.Update(librosTodos[0]);
-                librosTodos = connection.Table<Libro>().ToList();
+                List<Mensaje> mensajeTodos = connection.Table<Mensaje>.ToList();
                 connection.Close();
                 connection.Dispose();
+
+                ListView ltvMensajes = FindViewById<ListView>(Resource.Id.ltvMensajes);
+                ltvMensajes.Adater = new AdaptadorMensaje(this, mensajeTodos);
+                ltvMensajes.ItemClick += (sender, e) =>
+                {
+                    Toast.MakeText(this, mensajeTodos[e.Position].mensaje, ToastLength.Short).show();
+                };
             }
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
